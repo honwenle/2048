@@ -13,6 +13,7 @@ cvs.width = WRAP_SIZE;
 cvs.height = WRAP_SIZE;
 
 var blocks = [];
+var list = [];
 
 function roundRect (x, y, w, h, r, context) {
     context = context || ctx;
@@ -71,6 +72,15 @@ function getRand4() {
 }
 function getRandN() {
     return ~~(Math.random() * blocks.length-1) + 1;
+}
+function getID (x, y) {
+    return y*10 + x;
+}
+function getXY (id) {
+    return {
+        x: id%10,
+        y: ~~(id/10)
+    }
 }
 
 for (var i = 0; i < 3; i++) {
