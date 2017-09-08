@@ -12,6 +12,7 @@ back.height = WRAP_SIZE;
 cvs.width = WRAP_SIZE;
 cvs.height = WRAP_SIZE;
 var ani;
+var sX, sY;
 
 var blocks = [];
 var list = {};
@@ -116,6 +117,46 @@ function getXY (id) {
         y: ~~(id/10)
     }
 }
+function userPlay() {
+    cvs.addEventListener('touchstart', function (e) {
+        e.preventDefault();
+        sX = e.touches[0].pageX;
+        sY = e.touches[0].pageY;
+    }, false);
+    cvs.addEventListener('touchend', function (e) {
+        var eX = e.changedTouches[0].pageX,
+            eY = e.changedTouches[0].pageY;
+        var dtX = eX - sX,
+            dtY = eY - sY;
+        if (dtX > 20 && dtX > Math.abs(dtY)) {
+            console.log('right')
+        } else if (dtX < -20 && dtX < -Math.abs(dtY)) {
+            console.log('left')
+        } else if (dtY > 20) {
+            console.log('down')
+        } else if (dtY < -20) {
+            console.log('up')
+        }
+    }, false);
+    document.onkeyup = function (e) {
+        switch (e.keyCode) {
+            case 37:
+                console.log('left')
+                break;
+            case 38:
+                console.log('up')
+                break;
+            case 39:
+                console.log('right')
+                break;
+            case 40:
+                console.log('down')
+                break;
+            default:
+                break;
+        }
+    }
+}
 
 function init () {
     for (var i = 0; i < 3; i++) {
@@ -125,6 +166,7 @@ function init () {
     newBlock();
     newBlock();
     zoomInBlock();
+    userPlay();
 }
 
 init();
