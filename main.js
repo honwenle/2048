@@ -34,6 +34,8 @@ function roundRect (x, y, w, h, r, context) {
 function preloadBlock(n) {
     var cvsBlcok = document.createElement('canvas');
     var ctxBlock = cvsBlcok.getContext('2d');
+    cvsBlcok.width = SIZE;
+    cvsBlcok.height = SIZE;
     ctxBlock.fillStyle = '#' + COLOR[n];
     roundRect(0, 0, SIZE, SIZE, GAP_SIZE/2, ctxBlock);
     ctxBlock.fillStyle = '#716A63';
@@ -61,11 +63,22 @@ function drawBack () {
 function drawBlock (x, y, n) {
     ctx.drawImage(blocks[n],
         GAP_SIZE * (x+1) + SIZE * x,
-        GAP_SIZE * (y+1) + SIZE * y);
+        GAP_SIZE * (y+1) + SIZE * y
+    );
 }
 function newBlock() {
-    drawBlock(getRand4(), getRand4(), getRandN());
-    drawBlock(getRand4(), getRand4(), getRandN());
+    if (list.length >= 16) {
+        console.log('没有格子可以新增了');
+        return false;
+    }
+    var x, y;
+    do {
+        x = getRand4();
+        y = getRand4();
+    } while (list.indexOf(getID(x, y)) > -1)
+    drawBlock(x, y, getRandN());
+    list.push(getID(x, y));
+
 }
 function getRand4() {
     return ~~(Math.random() * 4);
@@ -87,4 +100,5 @@ for (var i = 0; i < 3; i++) {
     preloadBlock(i);
 }
 drawBack();
+newBlock();
 newBlock();
