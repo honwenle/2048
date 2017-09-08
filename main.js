@@ -1,6 +1,6 @@
-var WRAP_SIZE = 500;
-var SIZE = WRAP_SIZE / 5;
-var GAP_SIZE = SIZE / 5;
+var WRAP_SIZE = 500; // 整个尺寸
+var SIZE = WRAP_SIZE / 5; // 格子尺寸
+var GAP_SIZE = SIZE / 5; // 间隙尺寸
 var COLOR = ['CDC1B4','EEE4DA','EDE0C8']
 
 var back = document.getElementById('back'),
@@ -11,12 +11,12 @@ back.width = WRAP_SIZE;
 back.height = WRAP_SIZE;
 cvs.width = WRAP_SIZE;
 cvs.height = WRAP_SIZE;
-var ani;
-var sX, sY;
+var ani; // 动画对象
+var sX, sY; // 触摸起点
 
-var blocks = [];
-var list = {};
-
+var blocks = []; // 格子类型列表
+var list = {}; // 格子列表
+// 画圆角矩形
 function roundRect (x, y, w, h, r, context) {
     context = context || ctx;
     context.beginPath();
@@ -32,7 +32,7 @@ function roundRect (x, y, w, h, r, context) {
     context.closePath();
     context.fill();
 }
-
+// 小方格素材(n决定颜色和数字)
 function preloadBlock(n) {
     var cvsBlcok = document.createElement('canvas');
     var ctxBlock = cvsBlcok.getContext('2d');
@@ -49,7 +49,7 @@ function preloadBlock(n) {
     }
     blocks.push(cvsBlcok);
 }
-
+// 画背景
 function drawBack () {
     ctxBack.fillStyle = '#BBADA0';
     roundRect(0, 0, WRAP_SIZE, WRAP_SIZE, GAP_SIZE/2, ctxBack);
@@ -60,7 +60,9 @@ function drawBack () {
             ctxBack.drawImage(blocks[0], x, y);
             list[getID(i,j)] = {
                 n: null,
-                size: 0
+                size: 0,
+                x: x,
+                y: y
             };
         }
     }
@@ -85,12 +87,13 @@ function zoomInBlock () {
     }
     ani = requestAnimationFrame(zoomInBlock);
 }
-function drawBlock (x, y, n) {
-    ctx.drawImage(blocks[n],
-        GAP_SIZE * (x+1) + SIZE * x,
-        GAP_SIZE * (y+1) + SIZE * y
-    );
-}
+// function drawBlock (x, y, n) {
+//     ctx.drawImage(blocks[n],
+//         GAP_SIZE * (x+1) + SIZE * x,
+//         GAP_SIZE * (y+1) + SIZE * y
+//     );
+// }
+// 新增一个随机格子
 function newBlock() {
     var arr = [];
     for (var i in list) {
@@ -117,6 +120,7 @@ function getXY (id) {
         y: ~~(id/10)
     }
 }
+// 监听用户输入方向
 function userPlay() {
     cvs.addEventListener('touchstart', function (e) {
         e.preventDefault();
@@ -157,7 +161,7 @@ function userPlay() {
         }
     }
 }
-
+// 初始化
 function init () {
     for (var i = 0; i < 3; i++) {
         preloadBlock(i);
@@ -168,5 +172,4 @@ function init () {
     zoomInBlock();
     userPlay();
 }
-
 init();
