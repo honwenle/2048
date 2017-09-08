@@ -66,7 +66,7 @@ function drawBack () {
     }
 }
 var isAni;
-function zoomInBlock () {
+function moveBlock () {
     ctx.clearRect(0, 0, WRAP_SIZE, WRAP_SIZE);
     isAni = false;
     for (var i in list) {
@@ -92,12 +92,12 @@ function zoomInBlock () {
         }
     }
     if (isAni) {
-        ani = requestAnimationFrame(zoomInBlock);
+        ani = requestAnimationFrame(moveBlock);
     } else {
         console.log('不动了')
     }
 }
-function calcBlock () {
+function calcBlock (dirX, dirY) {
     for (var i in list) {
         if (list[i].n) {
             var xy = getXY(i);
@@ -114,7 +114,7 @@ function calcBlock () {
             };
         }
     }
-    zoomInBlock();
+    moveBlock();
 }
 // 新增一个随机格子
 function newBlock() {
@@ -158,7 +158,7 @@ function userPlay() {
         if (dtX > 20 && dtX > Math.abs(dtY)) {
             console.log('right')
         } else if (dtX < -20 && dtX < -Math.abs(dtY)) {
-            console.log('left')
+            calcBlock(-1, 0);
         } else if (dtY > 20) {
             console.log('down')
         } else if (dtY < -20) {
@@ -191,8 +191,8 @@ function init () {
     }
     drawBack();
     newBlock();
-    // newBlock();
-    zoomInBlock();
+    newBlock();
+    moveBlock();
     userPlay();
 }
 init();
