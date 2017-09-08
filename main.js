@@ -60,39 +60,62 @@ function drawBack () {
             ctxBack.drawImage(blocks[0], x, y);
             list[getID(i,j)] = {
                 n: null,
-                size: 0,
-                x: x,
-                y: y
+                size: 0
             };
         }
     }
 }
-
+var isAni;
 function zoomInBlock () {
     ctx.clearRect(0, 0, WRAP_SIZE, WRAP_SIZE);
+    isAni = false;
     for (var i in list) {
         var obj = list[i];
         if (obj.n) {
             var xy = getXY(i);
             if (obj.size < SIZE) {
+                isAni = true;
                 obj.size += 10;
             }
+            if (obj.x && obj.x != xy.x) {
+                isAni = true;
+                obj.x = Math.max(obj.x + obj.dtX, xy.x);
+            } else {
+                obj.x = undefined;
+            }
             ctx.drawImage(blocks[obj.n],
-                GAP_SIZE * (xy.x+1) + SIZE * xy.x + (SIZE-obj.size)/2,
+                obj.x || GAP_SIZE * (xy.x+1) + SIZE * xy.x + (SIZE-obj.size)/2,
                 GAP_SIZE * (xy.y+1) + SIZE * xy.y + (SIZE-obj.size)/2,
                 obj.size,
                 obj.size
             );
         }
     }
-    ani = requestAnimationFrame(zoomInBlock);
+    if (isAni) {
+        ani = requestAnimationFrame(zoomInBlock);
+    } else {
+        console.log('不动了')
+    }
 }
-// function drawBlock (x, y, n) {
-//     ctx.drawImage(blocks[n],
-//         GAP_SIZE * (x+1) + SIZE * x,
-//         GAP_SIZE * (y+1) + SIZE * y
-//     );
-// }
+function calcBlock () {
+    for (var i in list) {
+        if (list[i].n) {
+            var xy = getXY(i);
+            var x = GAP_SIZE * (xy.x+1) + SIZE * xy.x;
+            list[getID(0, xy.y)] = {
+                n: list[i].n,
+                size: list[i].size,
+                x: x,
+                dtX: (GAP_SIZE - x)/10
+            };
+            list[i] = {
+                n: null,
+                size: 0
+            };
+        }
+    }
+    zoomInBlock();
+}
 // 新增一个随机格子
 function newBlock() {
     var arr = [];
@@ -105,7 +128,7 @@ function newBlock() {
         var id = arr[~~(Math.random() * arr.length)];
         list[id].n = getRandN();
     } else {
-        console.log('nonono')
+        console.log('死了')
     }
 }
 function getRandN() {
@@ -168,7 +191,7 @@ function init () {
     }
     drawBack();
     newBlock();
-    newBlock();
+    // newBlock();
     zoomInBlock();
     userPlay();
 }
