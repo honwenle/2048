@@ -169,7 +169,7 @@ function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
     };
 }
 function getRandN() {
-    return ~~(Math.random() * 2) + 1;
+    return Math.random() > .8 ? 2 : 1;
 }
 function getPos (n) {
     return GAP_SIZE * (n+1) + SIZE * n;
