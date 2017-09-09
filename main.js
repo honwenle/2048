@@ -55,8 +55,8 @@ function drawBack () {
     roundRect(0, 0, WRAP_SIZE, WRAP_SIZE, GAP_SIZE/2, ctxBack);
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 4; j++) {
-            var x = GAP_SIZE * (i+1) + SIZE * i,
-                y = GAP_SIZE * (j+1) + SIZE * j
+            var x = getDistance(i),
+                y = getDistance(j)
             ctxBack.drawImage(blocks[0], x, y);
             list[getID(i,j)] = {
                 n: null,
@@ -77,15 +77,15 @@ function moveBlock () {
                 isAni = true;
                 obj.size += 10;
             }
-            if (obj.x && obj.x != xy.x) {
+            if (obj.pos && obj.pos != xy.x) {
                 isAni = true;
-                obj.x = Math.max(obj.x + obj.dtX, xy.x);
+                obj.pos = Math.max(obj.pos + obj.dt, xy.x);
             } else {
-                obj.x = undefined;
+                obj.pos = undefined;
             }
             ctx.drawImage(blocks[obj.n],
-                obj.x || GAP_SIZE * (xy.x+1) + SIZE * xy.x + (SIZE-obj.size)/2,
-                GAP_SIZE * (xy.y+1) + SIZE * xy.y + (SIZE-obj.size)/2,
+                obj.pos || getDistance(xy.x) + (SIZE-obj.size)/2,
+                getDistance(xy.y) + (SIZE-obj.size)/2,
                 obj.size,
                 obj.size
             );
@@ -97,21 +97,21 @@ function moveBlock () {
         console.log('不动了')
     }
 }
+// 计算并设置新坐标
 function calcBlock (dirX, dirY) {
-    for (var i in list) {
-        if (list[i].n) {
-            var xy = getXY(i);
-            var x = GAP_SIZE * (xy.x+1) + SIZE * xy.x;
-            list[getID(0, xy.y)] = {
-                n: list[i].n,
-                size: list[i].size,
-                x: x,
-                dtX: (GAP_SIZE - x)/10
-            };
-            list[i] = {
-                n: null,
-                size: 0
-            };
+    for (var i = 0; i < 4; i++) {
+        var ct = 0;
+        for (var j = 0; j < 4; j++) {
+            var obj = list[getID(j, i)]
+            if (!obj.n) {
+                ct ++;
+            } else if (ct != 0) {
+                setBlock(j-ct, i, obj.n,
+                    getDistance(j),
+                    (getDistance(j-ct) - getDistance(j))/5
+                );
+                setBlock(j, i);
+            }
         }
     }
     moveBlock();
@@ -134,6 +134,9 @@ function newBlock() {
 function getRandN() {
     return ~~(Math.random() * blocks.length-1) + 1;
 }
+function getDistance (n) {
+    return GAP_SIZE * (n+1) + SIZE * n;
+}
 function getID (x, y) {
     return y*10 + x;
 }
@@ -142,6 +145,11 @@ function getXY (id) {
         x: id%10,
         y: ~~(id/10)
     }
+}
+function setBlock (col, row, n = null, pos, dt, size = SIZE) {
+    list[getID(col, row)] = {
+        n,pos,dt,size
+    };
 }
 // 监听用户输入方向
 function userPlay() {
