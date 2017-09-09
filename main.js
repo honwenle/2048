@@ -163,9 +163,14 @@ function newBlock() {
         console.log('没地加了')
     }
 }
-function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
+function setBlock(id, col, row) {
+    var n = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var pos = arguments[4];
+    var dt = arguments[5];
+    var size = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : SIZE;
+
     list[id] = {
-        col,row,n,pos,dt,size
+        col: col, row: row, n: n, pos: pos, dt: dt, size: size
     };
 }
 function getRandN() {
