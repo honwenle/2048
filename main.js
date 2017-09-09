@@ -1,7 +1,7 @@
 var WRAP_SIZE = 500; // 整个尺寸
 var SIZE = WRAP_SIZE / 5; // 格子尺寸
 var GAP_SIZE = SIZE / 5; // 间隙尺寸
-var COLOR = ['CDC1B4','EEE4DA','EDE0C8']
+var COLOR = ['CDC1B4','EEE4DA','EDE0C8','F2B179','F59563','F57C5F','F65E3B']
 
 var back = document.getElementById('back'),
     cvs = document.getElementById('main');
@@ -16,6 +16,7 @@ var sX, sY; // 触摸起点
 
 var blocks = []; // 格子类型列表
 var list = {}; // 格子列表
+var highN;
 // 画圆角矩形
 function roundRect (x, y, w, h, r, context) {
     context = context || ctx;
@@ -34,6 +35,7 @@ function roundRect (x, y, w, h, r, context) {
 }
 // 小方格素材(n决定颜色和数字)
 function preloadBlock(n) {
+    highN = n;
     var cvsBlcok = document.createElement('canvas');
     var ctxBlock = cvsBlcok.getContext('2d');
     cvsBlcok.width = SIZE;
@@ -65,27 +67,32 @@ function drawBack () {
         }
     }
 }
-var isAni;
+var isAni, needNew;
+// 遍历每个格子的目标值，进行动画
 function moveBlock () {
     ctx.clearRect(0, 0, WRAP_SIZE, WRAP_SIZE);
-    isAni = false;
+    isAni = false, needNew = false;
     for (var i in list) {
         var obj = list[i];
         if (obj.n) {
-            var xy = getXY(i);
             if (obj.size < SIZE) {
                 isAni = true;
                 obj.size += 10;
             }
-            if (obj.pos && obj.pos != xy.x) {
-                isAni = true;
-                obj.pos = Math.max(obj.pos + obj.dt, xy.x);
-            } else {
-                obj.pos = undefined;
+            if (obj.pos) {
+                if (obj.pos != getPos(obj.col)) {
+                    isAni = true;
+                    obj.pos = Math.max(obj.pos + obj.dt, getPos(obj.col));
+                } else {
+                    setBlock(getID(obj.col, obj.row), obj.col, obj.row, obj.n);
+                    setBlock(i);
+                    obj.pos = undefined;
+                    needNew = true;
+                }
             }
             ctx.drawImage(blocks[obj.n],
-                obj.pos || getPos(xy.x) + (SIZE-obj.size)/2,
-                getPos(xy.y) + (SIZE-obj.size)/2,
+                obj.pos || getPos(obj.col) + (SIZE-obj.size)/2,
+                getPos(obj.row) + (SIZE-obj.size)/2,
                 obj.size,
                 obj.size
             );
@@ -94,27 +101,47 @@ function moveBlock () {
     if (isAni) {
         ani = requestAnimationFrame(moveBlock);
     } else {
+        if (needNew) {
+            newBlock();
+            ani = requestAnimationFrame(moveBlock);
+        }
         console.log('不动了')
     }
 }
 // 计算并设置新坐标
 function calcBlock (dirX, dirY) {
     for (var i = 0; i < 4; i++) {
-        var ct = 0;
+        var ct = 0,
+            last = undefined;
         for (var j = 0; j < 4; j++) {
             var obj = list[getID(j, i)]
             if (!obj.n) {
                 ct ++;
-            } else if (ct != 0) {
-                setBlock(j-ct, i, obj.n,
-                    getPos(j),
-                    (getPos(j-ct) - getPos(j))/5
-                );
-                setBlock(j, i);
+            } else {
+                if (last && last.n == obj.n) {
+                    ct ++;
+                    obj.n ++;
+                    if (obj.n > highN) {
+                        preloadBlock(obj.n);
+                    }
+                } else {
+                    last = list[getID(j, i)];
+                }
+                if (ct != 0) {
+                    setBlock(getID(j, i), j-ct, i, obj.n,
+                        getPos(j),
+                        (getPos(j-ct) - getPos(j))/5
+                    );
+                }
             }
         }
     }
     moveBlock();
+}
+function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
+    list[id] = {
+        col,row,n,pos,dt,size
+    };
 }
 // 新增一个随机格子
 function newBlock() {
@@ -126,7 +153,7 @@ function newBlock() {
     }
     if (arr.length > 0) {
         var id = arr[~~(Math.random() * arr.length)];
-        list[id].n = getRandN();
+        setBlock(id, id%10, ~~(id/10), getRandN(), undefined, undefined, 0);
     } else {
         console.log('死了')
     }
@@ -145,11 +172,6 @@ function getXY (id) {
         x: id%10,
         y: ~~(id/10)
     }
-}
-function setBlock (col, row, n = null, pos, dt, size = SIZE) {
-    list[getID(col, row)] = {
-        n,pos,dt,size
-    };
 }
 // 监听用户输入方向
 function userPlay() {
@@ -176,7 +198,7 @@ function userPlay() {
     document.onkeyup = function (e) {
         switch (e.keyCode) {
             case 37:
-                console.log('left')
+                calcBlock(-1, 0);
                 break;
             case 38:
                 console.log('up')
