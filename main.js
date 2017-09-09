@@ -73,7 +73,7 @@ function moveBlock () {
     ctx.clearRect(0, 0, WRAP_SIZE, WRAP_SIZE);
     isAni = false, needNew = false;
     for (var i = 0; i < 4; i++) {
-        for (var j = 0; j < 4; j ++) {
+        for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
             var obj = list[getID(j, i)];
             if (obj.n) {
                 if (obj.size < SIZE) {
@@ -110,17 +110,17 @@ function moveBlock () {
         }
     }
 }
-function refreshBlock () {
-    for (var i = 0; i < 4; i++) {
-        for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
-            var obj = list[getID(j, i)];
-            if (obj.n) {
-                setBlock(getID(obj.col, obj.row), obj.col, obj.row, obj.n);
-                setBlock(getID(j, i));
-            }
-        }
-    }
-}
+// function refreshBlock () {
+//     for (var i = 0; i < 4; i++) {
+//         for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
+//             var obj = list[getID(j, i)];
+//             if (obj.n) {
+//                 setBlock(getID(obj.col, obj.row), obj.col, obj.row, obj.n);
+//                 setBlock(getID(j, i));
+//             }
+//         }
+//     }
+// }
 // 计算并设置新坐标
 var dirX = 1;
 function calcBlock (dirX) {
@@ -153,11 +153,6 @@ function calcBlock (dirX) {
     }
     moveBlock();
 }
-function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
-    list[id] = {
-        col,row,n,pos,dt,size
-    };
-}
 // 新增一个随机格子
 function newBlock() {
     var arr = [];
@@ -172,6 +167,11 @@ function newBlock() {
     } else {
         console.log('死了')
     }
+}
+function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
+    list[id] = {
+        col,row,n,pos,dt,size
+    };
 }
 function getRandN() {
     return ~~(Math.random() * 2) + 1;
