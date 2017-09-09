@@ -73,27 +73,29 @@ function moveBlock () {
     ctx.clearRect(0, 0, WRAP_SIZE, WRAP_SIZE);
     isAni = false, needNew = false;
     for (var i = 0; i < 4; i++) {
-        for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
-            var obj = list[getID(j, i)];
+        for (var j = (inv==1 ? 0 : 3); j <= 3 && j >= 0; j += inv) {
+            var id = dir == 'x' ? getID(j, i) : getID(i, j);
+            var obj = list[id];
             if (obj.n) {
                 if (obj.size < SIZE) {
                     isAni = true;
                     obj.size += 10;
                 }
                 if (obj.pos) {
-                    if (obj.pos != getPos(obj.col)) {
+                    var _pos = dir == 'x' ? getPos(obj.col) : getPos(obj.row);
+                    if (obj.pos != _pos) {
                         isAni = true;
-                        obj.pos = obj.dt < 0 ? Math.max(obj.pos + obj.dt, getPos(obj.col)) : Math.min(obj.pos + obj.dt, getPos(obj.col));
+                        obj.pos = obj.dt < 0 ? Math.max(obj.pos + obj.dt, _pos) : Math.min(obj.pos + obj.dt, _pos);
                     } else {
                         setBlock(getID(obj.col, obj.row), obj.col, obj.row, obj.n);
-                        setBlock(getID(j, i));
+                        setBlock(id);
                         obj.pos = undefined;
                         needNew = true;
                     }
                 }
                 ctx.drawImage(blocks[obj.n],
-                    obj.pos || getPos(obj.col) + (SIZE-obj.size)/2,
-                    getPos(obj.row) + (SIZE-obj.size)/2,
+                    (dir=='x' && obj.pos) || getPos(obj.col) + (SIZE-obj.size)/2,
+                    (dir=='y' && obj.pos) || getPos(obj.row) + (SIZE-obj.size)/2,
                     obj.size,
                     obj.size
                 );
@@ -105,31 +107,22 @@ function moveBlock () {
     } else {
         if (needNew) {
             newBlock();
-            // refreshBlock();
+            newBlock();
             ani = requestAnimationFrame(moveBlock);
         }
     }
 }
-// function refreshBlock () {
-//     for (var i = 0; i < 4; i++) {
-//         for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
-//             var obj = list[getID(j, i)];
-//             if (obj.n) {
-//                 setBlock(getID(obj.col, obj.row), obj.col, obj.row, obj.n);
-//                 setBlock(getID(j, i));
-//             }
-//         }
-//     }
-// }
 // 计算并设置新坐标
-var dirX = 1;
-function calcBlock (dirX) {
-    dirX = dirX;
+var dir = 'x', inv = 1;
+function calcBlock (direction, inverse) {
+    dir = direction;
+    inv = inverse;
     for (var i = 0; i < 4; i++) {
         var ct = 0,
             last = undefined;
-        for (var j = (dirX==1 ? 0 : 3); j <= 3 && j >= 0; j += dirX) {
-            var obj = list[getID(j, i)]
+        for (var j = (inv==1 ? 0 : 3); j <= 3 && j >= 0; j += inv) {
+            var id = dir == 'x' ? getID(j, i) : getID(i, j);
+            var obj = list[id];
             if (!obj.n) {
                 ct ++;
             } else {
@@ -143,9 +136,11 @@ function calcBlock (dirX) {
                     last = obj;
                 }
                 if (ct != 0) {
-                    setBlock(getID(j, i), j-ct*dirX, i, obj.n,
+                    var _col = dir == 'x' ? j-ct*inv : i;
+                    var _row = dir == 'x' ? i : j-ct*inv;
+                    setBlock(id, _col, _row, obj.n,
                         getPos(j),
-                        (getPos(j-ct*dirX) - getPos(j))/10
+                        (getPos(j-ct*inv) - getPos(j))/10
                     );
                 }
             }
@@ -201,28 +196,28 @@ function userPlay() {
         var dtX = eX - sX,
             dtY = eY - sY;
         if (dtX > 20 && dtX > Math.abs(dtY)) {
-            calcBlock(-1);
+            calcBlock('x', -1);
         } else if (dtX < -20 && dtX < -Math.abs(dtY)) {
-            calcBlock(1);
+            calcBlock('x', 1);
         } else if (dtY > 20) {
-            console.log('down')
+            calcBlock('y', -1);
         } else if (dtY < -20) {
-            console.log('up')
+            calcBlock('y', 1);
         }
     }, false);
     document.onkeyup = function (e) {
         switch (e.keyCode) {
             case 37:
-                calcBlock(1);
+                calcBlock('x', 1);
                 break;
             case 38:
-                console.log('up')
+                calcBlock('y', 1);
                 break;
             case 39:
-                calcBlock(-1);
+                calcBlock('x', -1);
                 break;
             case 40:
-                console.log('down')
+                calcBlock('y', -1);
                 break;
             default:
                 break;
