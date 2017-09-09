@@ -160,7 +160,7 @@ function newBlock() {
         var id = arr[~~(Math.random() * arr.length)];
         setBlock(id, id%10, ~~(id/10), getRandN(), undefined, undefined, 0);
     } else {
-        console.log('死了')
+        console.log('没地加了')
     }
 }
 function setBlock (id, col, row, n = null, pos, dt, size = SIZE) {
@@ -191,6 +191,9 @@ function userPlay() {
         sY = e.touches[0].pageY;
     }, false);
     cvs.addEventListener('touchend', function (e) {
+        if (isAni) {
+            return false;
+        }
         var eX = e.changedTouches[0].pageX,
             eY = e.changedTouches[0].pageY;
         var dtX = eX - sX,
@@ -206,6 +209,9 @@ function userPlay() {
         }
     }, false);
     document.onkeyup = function (e) {
+        if (isAni) {
+            return false;
+        }
         switch (e.keyCode) {
             case 37:
                 calcBlock('x', 1);
