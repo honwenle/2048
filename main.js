@@ -55,8 +55,8 @@ function drawBack () {
     roundRect(0, 0, WRAP_SIZE, WRAP_SIZE, GAP_SIZE/2, ctxBack);
     for (var i = 0; i < 4; i++) {
         for (var j = 0; j < 4; j++) {
-            var x = getDistance(i),
-                y = getDistance(j)
+            var x = getPos(i),
+                y = getPos(j)
             ctxBack.drawImage(blocks[0], x, y);
             list[getID(i,j)] = {
                 n: null,
@@ -84,8 +84,8 @@ function moveBlock () {
                 obj.pos = undefined;
             }
             ctx.drawImage(blocks[obj.n],
-                obj.pos || getDistance(xy.x) + (SIZE-obj.size)/2,
-                getDistance(xy.y) + (SIZE-obj.size)/2,
+                obj.pos || getPos(xy.x) + (SIZE-obj.size)/2,
+                getPos(xy.y) + (SIZE-obj.size)/2,
                 obj.size,
                 obj.size
             );
@@ -107,8 +107,8 @@ function calcBlock (dirX, dirY) {
                 ct ++;
             } else if (ct != 0) {
                 setBlock(j-ct, i, obj.n,
-                    getDistance(j),
-                    (getDistance(j-ct) - getDistance(j))/5
+                    getPos(j),
+                    (getPos(j-ct) - getPos(j))/5
                 );
                 setBlock(j, i);
             }
@@ -134,7 +134,7 @@ function newBlock() {
 function getRandN() {
     return ~~(Math.random() * blocks.length-1) + 1;
 }
-function getDistance (n) {
+function getPos (n) {
     return GAP_SIZE * (n+1) + SIZE * n;
 }
 function getID (x, y) {
